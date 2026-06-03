@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KR8TIVE STUDIOX | Private Collection</title>
+    
+    <!-- Better Typography: Elegant & Modern -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- Dark Luxury Theme & Typography --- */
+        :root {
+            --bg-color: #070709;
+            --text-main: #f5f5f7;
+            --text-muted: #86868b;
+            --glass-bg: rgba(25, 25, 25, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-gradient: linear-gradient(135deg, #ffffff 0%, #a1a1a6 100%);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            /* Ambient gradient accent */
+            background-image: radial-gradient(circle at 50% -20%, #1a1a24 0%, var(--bg-color) 60%);
+        }
+
+        /* --- Full-Screen Hero & Login --- */
+        #hero-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: height 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* The Glassmorphism Login Card */
+        #login-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        #login-card h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        #login-card p {
+            color: var(--text-muted);
+            font-weight: 300;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        #accessCode {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+            letter-spacing: 0.2em;
+            margin-bottom: 24px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #accessCode:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        #login-btn {
+            width: 100%;
+            background: var(--accent-gradient);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- Modern Pinterest-Style Masonry --- */
+        #gallery-section {
+            display: none;
+            padding: 40px 20px 100px;
+            max-width: 1600px;
+            margin: 0 auto;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .gallery-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        /* Masonry Layout Setup */
+        #gallery-grid {
+            column-count: 1;
+            column-gap: 24px;
+        }
+        @media (min-width: 640px) { #gallery-grid { column-count: 2; } }
+        @media (min-width: 1024px) { #gallery-grid { column-count: 3; } }
+        @media (min-width: 1440px) { #gallery-grid { column-count: 4; } }
+
+        /* --- Image Cards & Hover Animations --- */
+        .photo-card {
+            position: relative;
+            break-inside: avoid;
+            margin-bottom: 24px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #111;
+            cursor: pointer;
+        }
+
+        /* Image Zoom on Hover */
+        .photo-card img {
+            width: 100%;
+            display: block;
+            border-radius: 16px;
+            transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: transform;
+        }
+
+        .photo-card:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Dark Gradient Overlay on Hover */
+        .photo-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 50%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .photo-card:hover::after {
+            opacity: 1;
+        }
+
+        /* Floating Download Button */
+        .download-btn {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translate(-50%, 20px);
+            opacity: 0;
+            z-index: 10;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            letter-spacing: 0.05em;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .photo-card:hover .download-btn {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+
+        .download-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Full Screen Hero & Login Area -->
+    <section id="hero-section">
+        <div id="login-card">
+            <h2>KR8TIVE STUDIOX</h2>
+            <p>Private Event Collection</p>
+            <input type="password" id="accessCode" placeholder="Enter PIN">
+            <button id="login-btn" onclick="checkAccess()">View Gallery</button>
+        </div>
+    </section>
+
+    <!-- Gallery Section (Hidden by Default) -->
+    <section id="gallery-section">
+        <div class="gallery-header">
+            <h1 id="gallery-title">KR8TIVE STUDIOX | Collection</h1>
+        </div>
+        <div id="gallery-grid"></div>
+    </section>
+
+    <script>
+        function checkAccess() {
+            const code = document.getElementById('accessCode').value;
+            
+            if (code === "KR8TIVE2026") {
+                const loginCard = document.getElementById('login-card');
+                const heroSection = document.getElementById('hero-section');
+                const gallerySection = document.getElementById('gallery-section');
+                
+                // Smooth Fade Out of Login
+                loginCard.style.transform = 'translateY(-20px) scale(0.95)';
+                loginCard.style.opacity = '0';
+                
+                setTimeout(() => {
+                    loginCard.style.display = 'none';
+                    heroSection.style.height = 'auto'; // Collapse hero height
+                    heroSection.style.paddingTop = '60px'; 
+                    
+                    // Show & Fade In Gallery
+                    gallerySection.style.display = 'block';
+                    // Slight delay to allow display:block to register before changing opacity
+                    setTimeout(() => {
+                        gallerySection.style.opacity = '1';
+                        loadGallery();
+                    }, 50);
+                }, 500);
+
+            } else { 
+                alert("Incorrect PIN. Please try again."); 
+            }
+        }
+
+        function loadGallery() {
+            fetch('/api/photos')
+                .then(res => res.json())
+                .then(files => {
+                    const gallery = document.getElementById('gallery-grid');
+                    gallery.innerHTML = "";
+                    
+                    const galleryFiles = files.filter(file => !file.startsWith('bg'));
+
+                    if (galleryFiles.length === 0) {
+                        gallery.innerHTML = "<p style='color: var(--text-muted); text-align: center;'>No photographs found in this collection.</p>";
+                        return;
+                    }
+
+                    galleryFiles.forEach(file => {
+                        const div = document.createElement('div');
+                        div.className = 'photo-card';
+                        
+                        // We use an empty onclick to ensure mobile devices trigger the hover states properly
+                        div.innerHTML = `
+                            <img src="/uploads/events/${file}" loading="lazy" alt="Client Image">
+                            <a href="/uploads/events/${file}" class="download-btn" download onclick="event.stopPropagation();">Download</a>
+                        `;
+                        gallery.appendChild(div);
+                    });
+                })
+                .catch(err => {
+                    console.error("Error loading gallery:", err);
+                });
+        }
+    </script>
+</body>
+</html>
