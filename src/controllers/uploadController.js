@@ -12,8 +12,7 @@ destination: (req, file, cb) => {
         fs.mkdirSync(dir, { recursive: true });
     }
     cb(null, dir);
-}
-    },
+},
     filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname);
     }

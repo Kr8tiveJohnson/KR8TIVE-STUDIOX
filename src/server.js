@@ -1,3 +1,8 @@
+const cors = require('cors'); // Import it
+const app = express();
+
+app.use(cors()); // Enable it for all routes
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
