@@ -300,117 +300,82 @@ input[type="file"]{
     <div id="manageGrid" class="manage-grid"></div>
 </div>
 <script>
-
 const fileInput = document.getElementById('fileInput');
 const fileList = document.getElementById('fileList');
 const statusBox = document.getElementById('status');
+const clientInput = document.getElementById('clientName'); // Added reference
 
+// Display files in UI
 fileInput.addEventListener('change', () => {
-
     fileList.innerHTML = '';
-
     [...fileInput.files].forEach(file => {
-
         const item = document.createElement('div');
-
         item.className = 'file-item';
-
         item.textContent = file.name;
-
         fileList.appendChild(item);
-
     });
-
 });
 
-document.getElementById('uploadForm')
-.addEventListener('submit', async (e) => {
-
+// Submit Form
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const formData = new FormData();
+    // Ensure this ID matches the input in your HTML
+    const clientName = document.getElementById('clientName').value; 
+    formData.append('clientName', clientName);
 
     [...fileInput.files].forEach(file => {
         formData.append('photos', file);
     });
 
     try {
-
-        statusBox.style.display = 'block';
-        statusBox.className = 'status';
-
         const response = await fetch('/api/upload', {
-            method:'POST',
-            body:formData
+            method: 'POST',
+            body: formData 
         });
 
-        const result = await response.json();
-
-        statusBox.classList.add('success');
-        statusBox.textContent = result.message || 'Upload successful';
-
-        fileInput.value = '';
-        fileList.innerHTML = '';
-
-    } catch(error){
-
-        statusBox.classList.add('error');
-        statusBox.textContent = 'Upload failed. Please try again.';
-
-        console.error(error);
-
+        if (response.ok) {
+            // Success logic
+            loadAssets();
+        } else {
+            // Handle error
+            const result = await response.json();
+            console.error("Server Error:", result);
+        }
+    } catch(error) {
+        console.error("Fetch Error:", error);
     }
-
 });
-
-// Load files on page load
+// Fetch files based on client name
 async function loadAssets() {
-    const res = await fetch('/api/photos');
+    const clientName = document.getElementById('clientName').value || 'uncategorized';
+    // Matches the new GET route: /api/photos/:clientName
+    const res = await fetch(`/api/photos/${encodeURIComponent(clientName)}`);
     const files = await res.json();
+    
     const grid = document.getElementById('manageGrid');
     grid.innerHTML = '';
     
     files.forEach(file => {
-        const div = document.createElement('div');
-        div.className = 'asset-item';
-        div.innerHTML = `
-            <img src="/uploads/events/${file}">
-            <button class="delete-btn" onclick="deleteFile('${file}')">Delete</button>
+        grid.innerHTML += `
+            <div class="asset-item">
+                <img src="/uploads/${encodeURIComponent(clientName)}/${encodeURIComponent(file)}">
+                <button onclick="deleteFile('${file}')">Delete</button>
+            </div>
         `;
-        grid.appendChild(div);
     });
 }
 
-// Delete functionality
+// Delete file based on client name
 async function deleteFile(filename) {
-    if (!confirm('Are you sure you want to delete this file?')) return;
-    
-    // Use encodeURIComponent to handle special characters correctly
-    try {
-        const response = await fetch(`/api/photos/${encodeURIComponent(filename)}`, { 
-            method: 'DELETE' 
-        });
-        
-        if (response.ok) {
-            loadAssets();
-        } else {
-            alert('Failed to delete. Check server console.');
-        }
-    } catch (error) {
-        console.error(error);
-    }
+    const clientName = document.getElementById('clientName').value;
+    // Matches the new DELETE route: /api/photos/:clientName/:filename
+    const res = await fetch(`/api/photos/${encodeURIComponent(clientName)}/${encodeURIComponent(filename)}`, { 
+        method: 'DELETE' 
+    });
+    if (res.ok) loadAssets();
 }
-
-// Initialize on load
-loadAssets();
-// Inside your submit event listener
-const formData = new FormData();
-const clientName = document.getElementById('clientName').value; // Add this input to your HTML
-formData.append('clientName', clientName);
-
-[...fileInput.files].forEach(file => {
-    formData.append('photos', file);
-});
 </script>
 
 </body>
