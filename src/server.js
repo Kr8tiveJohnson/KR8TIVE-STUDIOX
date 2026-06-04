@@ -1,16 +1,16 @@
-const cors = require('cors'); // Import it
-const app = express();
-
-app.use(cors()); // Enable it for all routes
-
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+
+// 1. Initialize the app first
 const app = express();
 
-// Simple Basic Auth Middleware
-const cors = require('cors');
-app.use(cors());
+// 2. Now you can use middleware
+app.use(cors()); 
+app.use(express.json());
+
+// 3. Define your authentication middleware
 const auth = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -18,7 +18,7 @@ const auth = (req, res, next) => {
         return res.status(401).send('Authentication required.');
     }
     const [user, pass] = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-    // Change these credentials!
+    
     if (user === 'kr8tiveadmin' && pass === 'studix2026') {
         next();
     } else {
@@ -26,8 +26,9 @@ const auth = (req, res, next) => {
     }
 };
 
-app.use(express.json());
-// Protect the admin page
-app.get('/admin', auth, (req, res) => { res.sendFile(path.join(__dirname, '../admin.html')); });
+// 4. Define your routes
+app.get('/admin', auth, (req, res) => { 
+    res.sendFile(path.join(__dirname, '../admin.html')); 
+});
 
-// ... rest of your code (keep your routes)
+// ... rest of your code
