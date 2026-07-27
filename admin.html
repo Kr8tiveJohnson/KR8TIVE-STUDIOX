@@ -685,7 +685,7 @@ function renderFilePreviews() {
         const imgUrl = URL.createObjectURL(file);
         
         item.innerHTML = `
-            <img src="${imgUrl}" alt="Preview" onload="URL.revokeObjectURL(this.src)">
+            <img src="${imgUrl}" alt="Preview">
             <div class="file-item-remove" onclick="removeSelectedFile(${index})">&times;</div>
             <div class="file-item-overlay">
                 <div class="file-item-name" title="${file.name}">${file.name}</div>
@@ -702,8 +702,53 @@ window.removeSelectedFile = function(index) {
     renderFilePreviews();
 };
 
-// Upload Photos
-uploadForm.addEventListener('submit', (e) => {
+// Helper function to upload a single file with progress tracking
+function uploadSingleFile(clientName, file, onProgress) {
+    return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('clientName', clientName);
+        formData.append('photos', file);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/upload', true);
+
+        xhr.upload.addEventListener('progress', (event) => {
+            if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                onProgress(percent);
+            }
+        });
+
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                try {
+                    const responseText = xhr.responseText.trim();
+                    if (xhr.status === 200) {
+                        resolve(JSON.parse(responseText));
+                    } else {
+                        let errorMsg = `HTTP Error ${xhr.status}`;
+                        try {
+                            const errObj = JSON.parse(responseText);
+                            errorMsg = errObj.error || errorMsg;
+                        } catch(e) {}
+                        reject(new Error(errorMsg));
+                    }
+                } catch (parseErr) {
+                    reject(new Error("Invalid server response format"));
+                }
+            }
+        };
+
+        xhr.onerror = () => {
+            reject(new Error("Network connection error"));
+        };
+
+        xhr.send(formData);
+    });
+}
+
+// Upload Photos sequentially to bypass Vercel serverless 4.5 MB payload limits (preventing 413 error)
+uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     uploadStatus.style.display = 'none';
     
@@ -718,16 +763,6 @@ uploadForm.addEventListener('submit', (e) => {
         return;
     }
 
-    const formData = new FormData();
-    formData.append('clientName', selectedClient);
-    selectedFiles.forEach(file => {
-        formData.append('photos', file);
-    });
-
-    // Calculate total size in MB
-    const totalBytes = selectedFiles.reduce((acc, f) => acc + f.size, 0);
-    const totalMB = (totalBytes / 1024 / 1024).toFixed(2);
-
     const progressContainer = document.getElementById('progressContainer');
     const progressBarFill = document.getElementById('progressBarFill');
     const progressState = document.getElementById('progressState');
@@ -738,82 +773,71 @@ uploadForm.addEventListener('submit', (e) => {
     progressContainer.style.display = 'block';
     progressBarFill.style.width = '0%';
     progressPercent.textContent = '0%';
-    progressState.textContent = `Uploading ${selectedFiles.length} photo(s)...`;
-    progressBytes.textContent = `0.00 MB of ${totalMB} MB`;
+    progressState.textContent = `Starting uploads...`;
 
     // Disable upload button
     const submitBtn = uploadForm.querySelector('.upload-btn');
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.5';
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/upload', true);
+    let successCount = 0;
+    let failedFiles = [];
 
-    // Track upload progress
-    xhr.upload.addEventListener('progress', (event) => {
-        if (event.lengthComputable) {
-            const percent = Math.round((event.loaded / event.total) * 100);
-            progressBarFill.style.width = `${percent}%`;
-            progressPercent.textContent = `${percent}%`;
-            
-            const loadedMB = (event.loaded / 1024 / 1024).toFixed(2);
-            progressBytes.textContent = `${loadedMB} MB of ${totalMB} MB`;
-            
-            if (percent === 100) {
-                progressState.textContent = 'Saving photos to collection...';
-            }
+    for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const fileMB = (file.size / 1024 / 1024).toFixed(2);
+        progressState.textContent = `Uploading photo ${i + 1} of ${selectedFiles.length}: ${file.name}`;
+        progressBytes.textContent = `File size: ${fileMB} MB`;
+
+        try {
+            await uploadSingleFile(selectedClient, file, (percent) => {
+                // Calculate overall progress across all files
+                const fileProgressWeight = 100 / selectedFiles.length;
+                const completedWeight = i * fileProgressWeight;
+                const currentWeight = (percent / 100) * fileProgressWeight;
+                const overallPercent = Math.round(completedWeight + currentWeight);
+                
+                progressBarFill.style.width = `${overallPercent}%`;
+                progressPercent.textContent = `${overallPercent}%`;
+            });
+            successCount++;
+        } catch (err) {
+            console.error(`Failed to upload ${file.name}:`, err);
+            failedFiles.push(`${file.name} (${err.message})`);
         }
-    });
+    }
 
-    // Handle upload completion
-    xhr.onreadystatechange = async () => {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            // Re-enable upload button
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = '1';
-            progressContainer.style.display = 'none';
+    // Hide progress bar and re-enable upload button
+    progressContainer.style.display = 'none';
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '1';
 
-            try {
-                const result = JSON.parse(xhr.responseText);
-                if (xhr.status === 200) {
-                    uploadStatus.className = 'status success';
-                    uploadStatus.textContent = `Upload successful! Added ${result.count || 0} photo(s) to the collection.`;
-                    uploadStatus.style.display = 'block';
-                    
-                    // Clear inputs
-                    selectedFiles = [];
-                    fileInput.value = '';
-                    fileList.innerHTML = '';
-                    
-                    // Refresh data
-                    await loadClients();
-                    loadAssets();
-                } else {
-                    uploadStatus.className = 'status error';
-                    uploadStatus.textContent = result.error || 'Server error occurred during upload.';
-                    uploadStatus.style.display = 'block';
-                }
-            } catch (err) {
-                console.error("Parse upload response error:", err);
-                uploadStatus.className = 'status error';
-                uploadStatus.textContent = 'Failed to process server response.';
-                uploadStatus.style.display = 'block';
-            }
+    if (successCount > 0) {
+        uploadStatus.className = 'status success';
+        let successMsg = `Upload complete! Successfully added ${successCount} photo(s) to the collection.`;
+        if (failedFiles.length > 0) {
+            successMsg += `\nFailed to upload ${failedFiles.length} file(s):\n- ` + failedFiles.join('\n- ');
         }
-    };
-
-    // Handle connection failures
-    xhr.onerror = () => {
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = '1';
-        progressContainer.style.display = 'none';
-        
-        uploadStatus.className = 'status error';
-        uploadStatus.textContent = 'Connection error occurred during file upload.';
+        uploadStatus.textContent = successMsg;
         uploadStatus.style.display = 'block';
-    };
-
-    xhr.send(formData);
+        
+        // Clear file list
+        selectedFiles = [];
+        fileInput.value = '';
+        fileList.innerHTML = '';
+        
+        // Refresh collections lists and details
+        await loadClients();
+        loadAssets();
+    } else {
+        uploadStatus.className = 'status error';
+        let errorMsg = 'Failed to upload photos. All files failed or exceeded size limits.';
+        if (failedFiles.length > 0) {
+            errorMsg += `\nErrors:\n- ` + failedFiles.join('\n- ');
+        }
+        uploadStatus.textContent = errorMsg;
+        uploadStatus.style.display = 'block';
+    }
 });
 
 // Load photo assets for currently selected client
