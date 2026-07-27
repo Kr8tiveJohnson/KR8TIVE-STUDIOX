@@ -4,45 +4,56 @@ const path = require('path');
 require('dotenv').config();
 
 async function initDb() {
-    const dbConfig = {
-        host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'postgres',
-        password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : '',
-        port: parseInt(process.env.DB_PORT || '5432', 10),
-    };
+    const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+    const isProduction = process.env.NODE_ENV === 'production' || connectionString !== undefined;
 
-    // 1. First connect to default 'postgres' database to check/create the project database
-    const adminClient = new Client({
-        ...dbConfig,
-        database: 'postgres',
-    });
+    let dbClient;
 
-    const targetDbName = process.env.DB_NAME || 'kr8tivestudiox';
+    if (connectionString) {
+        // Direct cloud database connection (creation is handled by cloud provider)
+        dbClient = new Client({
+            connectionString: connectionString,
+            ssl: { rejectUnauthorized: false }
+        });
+    } else {
+        // Local offline development database check & creation
+        const dbConfig = {
+            host: process.env.DB_HOST || 'localhost',
+            user: process.env.DB_USER || 'postgres',
+            password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : '',
+            port: parseInt(process.env.DB_PORT || '5432', 10),
+        };
 
-    try {
-        await adminClient.connect();
-        const res = await adminClient.query(
-            "SELECT 1 FROM pg_database WHERE datname = $1",
-            [targetDbName]
-        );
-        if (res.rowCount === 0) {
-            // Need to run CREATE DATABASE (cannot run in transaction, which is fine here)
-            await adminClient.query(`CREATE DATABASE "${targetDbName}"`);
-            console.log(`Database '${targetDbName}' created successfully.`);
-        } else {
-            console.log(`Database '${targetDbName}' already exists.`);
+        const adminClient = new Client({
+            ...dbConfig,
+            database: 'postgres',
+        });
+
+        const targetDbName = process.env.DB_NAME || 'kr8tivestudiox';
+
+        try {
+            await adminClient.connect();
+            const res = await adminClient.query(
+                "SELECT 1 FROM pg_database WHERE datname = $1",
+                [targetDbName]
+            );
+            if (res.rowCount === 0) {
+                await adminClient.query(`CREATE DATABASE "${targetDbName}"`);
+                console.log(`Database '${targetDbName}' created successfully.`);
+            } else {
+                console.log(`Database '${targetDbName}' already exists.`);
+            }
+        } catch (err) {
+            console.error("Error checking/creating database:", err);
+        } finally {
+            await adminClient.end();
         }
-    } catch (err) {
-        console.error("Error checking/creating database:", err);
-    } finally {
-        await adminClient.end();
-    }
 
-    // 2. Connect to the target database and build schema tables
-    const dbClient = new Client({
-        ...dbConfig,
-        database: targetDbName,
-    });
+        dbClient = new Client({
+            ...dbConfig,
+            database: targetDbName,
+        });
+    }
 
     try {
         await dbClient.connect();
