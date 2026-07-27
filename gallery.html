@@ -555,7 +555,9 @@
             galleryFiles.forEach(file => {
                 const div = document.createElement('div');
                 div.className = 'photo-card';
-                const fileUrl = `/uploads/${encodeURIComponent(clientName)}/${encodeURIComponent(file)}`;
+                const fileUrl = (file.startsWith('http://') || file.startsWith('https://'))
+                    ? file
+                    : `/uploads/${encodeURIComponent(clientName)}/${encodeURIComponent(file)}`;
                 
                 div.innerHTML = `
                     <img src="${fileUrl}" loading="lazy" alt="Client Image">

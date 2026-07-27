@@ -71,10 +71,36 @@ router.delete('/admin/clients/:clientName', auth, async (req, res) => {
             return res.status(404).json({ error: "Client not found in database" });
         }
 
+        // Fetch all client photo filenames/URLs so we can clean up storage
+        const photosRes = await pool.query(
+            "SELECT filename FROM photos WHERE client_id = $1",
+            [clientRes.rows[0].id]
+        );
+
         // Delete from database (cascade deletes rows in photos table automatically)
         await pool.query("DELETE FROM clients WHERE client_name = $1", [clientName]);
 
-        // Delete physical files and folder
+        // Clean up cloud or local storage files
+        const { del } = require('@vercel/blob');
+        for (const row of photosRes.rows) {
+            const file = row.filename;
+            if (file.startsWith('http://') || file.startsWith('https://')) {
+                if (process.env.BLOB_READ_WRITE_TOKEN) {
+                    try {
+                        await del(file);
+                    } catch (blobErr) {
+                        console.error("Vercel Blob deletion failed for:", file, blobErr);
+                    }
+                }
+            } else {
+                const targetPath = path.join(__dirname, '../../uploads', clientName, file);
+                if (fs.existsSync(targetPath)) {
+                    fs.unlinkSync(targetPath);
+                }
+            }
+        }
+
+        // Delete physical local folder if exists
         const dir = path.join(__dirname, '../../uploads', clientName);
         if (fs.existsSync(dir)) {
             fs.rmSync(dir, { recursive: true, force: true });
@@ -123,10 +149,32 @@ router.post('/upload', auth, upload.array('photos'), async (req, res) => {
         const clientId = clientRes.rows[0].id;
 
         const files = req.files || [];
+        const { put } = require('@vercel/blob');
+
         for (const file of files) {
+            let fileReference = '';
+
+            // Check if Vercel Blob token is set to determine if we run in Cloud environment
+            if (process.env.BLOB_READ_WRITE_TOKEN) {
+                // Upload directly to Vercel Blob
+                const blobPath = `uploads/${clientName}/${Date.now()}-${file.originalname}`;
+                const blob = await put(blobPath, file.buffer, { access: 'public' });
+                fileReference = blob.url; // URL becomes the filename reference
+            } else {
+                // Local disk storage fallback
+                const uniqueName = `${Date.now()}-${file.originalname}`;
+                const dir = path.join(__dirname, '../../uploads', clientName);
+                if (!fs.existsSync(dir)) {
+                    fs.mkdirSync(dir, { recursive: true });
+                }
+                const targetPath = path.join(dir, uniqueName);
+                fs.writeFileSync(targetPath, file.buffer);
+                fileReference = uniqueName;
+            }
+
             await pool.query(
                 "INSERT INTO photos (client_id, filename, original_name) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING",
-                [clientId, file.filename, file.originalname]
+                [clientId, fileReference, file.originalname]
             );
         }
 
@@ -143,7 +191,7 @@ router.delete('/photos/:clientName/:filename', auth, async (req, res) => {
     const filename = decodeURIComponent(req.params.filename);
 
     try {
-        // Delete from database
+        // Delete from database first
         const dbDelete = await pool.query(`
             DELETE FROM photos p
             USING clients c
@@ -151,14 +199,25 @@ router.delete('/photos/:clientName/:filename', auth, async (req, res) => {
             RETURNING p.id
         `, [clientName, filename]);
 
-        // Delete from disk
-        const targetPath = path.join(__dirname, '../../uploads', clientName, filename);
-        if (fs.existsSync(targetPath)) {
-            fs.unlinkSync(targetPath);
-        }
-
         if (dbDelete.rowCount === 0) {
             return res.status(404).json({ error: "File record not found" });
+        }
+
+        // Clean up cloud storage or local disk
+        const { del } = require('@vercel/blob');
+        if (filename.startsWith('http://') || filename.startsWith('https://')) {
+            if (process.env.BLOB_READ_WRITE_TOKEN) {
+                try {
+                    await del(filename);
+                } catch (blobErr) {
+                    console.error("Failed to delete from Vercel Blob:", filename, blobErr);
+                }
+            }
+        } else {
+            const targetPath = path.join(__dirname, '../../uploads', clientName, filename);
+            if (fs.existsSync(targetPath)) {
+                fs.unlinkSync(targetPath);
+            }
         }
 
         res.status(200).json({ message: "Deleted successfully" });

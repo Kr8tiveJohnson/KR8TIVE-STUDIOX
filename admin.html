@@ -621,8 +621,12 @@ async function loadAssets() {
         files.forEach(file => {
             const item = document.createElement('div');
             item.className = 'asset-item';
+            const fileUrl = (file.startsWith('http://') || file.startsWith('https://'))
+                ? file
+                : `/uploads/${encodeURIComponent(clientName)}/${encodeURIComponent(file)}`;
+                
             item.innerHTML = `
-                <img src="/uploads/${encodeURIComponent(clientName)}/${encodeURIComponent(file)}" alt="Asset Thumbnail">
+                <img src="${fileUrl}" alt="Asset Thumbnail">
                 <button class="delete-btn" onclick="deleteFile('${file}')">Delete</button>
             `;
             manageGrid.appendChild(item);
