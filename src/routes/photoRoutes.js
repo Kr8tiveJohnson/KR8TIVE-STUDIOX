@@ -6,6 +6,22 @@ const pool = require('../models/db');
 const auth = require('../middleware/auth');
 const { upload } = require('../controllers/uploadController');
 
+// ================= DATABASE DEBUGGING APIS =================
+
+router.get('/debug-db', async (req, res) => {
+    try {
+        const testRes = await pool.query("SELECT NOW()");
+        res.json({ success: true, time: testRes.rows[0].now });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            error: err.message,
+            stack: err.stack,
+            envKeys: Object.keys(process.env).filter(key => key.includes('POSTGRES') || key.includes('DATABASE') || key.includes('DB_'))
+        });
+    }
+});
+
 // ================= CLIENT MANAGEMENT APIS (ADMIN-ONLY) =================
 
 // GET all clients with photo count
