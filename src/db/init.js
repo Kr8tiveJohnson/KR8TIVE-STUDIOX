@@ -74,11 +74,16 @@ async function initDb() {
             CREATE TABLE IF NOT EXISTS photos (
                 id SERIAL PRIMARY KEY,
                 client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
-                filename VARCHAR(255) NOT NULL,
+                filename TEXT NOT NULL,
                 original_name VARCHAR(255) NOT NULL,
                 uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT unique_client_filename UNIQUE(client_id, filename)
             )
+        `);
+
+        // Migration: widen filename column from VARCHAR(255) to TEXT for Vercel Blob URLs
+        await dbClient.query(`
+            ALTER TABLE photos ALTER COLUMN filename TYPE TEXT
         `);
 
         // Create messages table
