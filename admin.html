@@ -120,18 +120,90 @@ input[type="file"] {
     display: none;
 }
 
-/* File List */
+/* File List Grid */
 .file-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 16px;
     margin-top: 25px;
 }
 
 .file-item {
-    background: #fafafa;
-    border: 1px solid #eee;
-    border-radius: 14px;
-    padding: 14px 18px;
-    margin-bottom: 10px;
-    font-size: .95rem;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.file-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.file-item img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.file-item-overlay {
+    position: relative;
+    z-index: 5;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.3) 70%, transparent 100%);
+    padding: 8px 10px;
+    color: white;
+    width: 100%;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.file-item-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.file-item-size {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.file-item-remove {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 10;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.file-item-remove:hover {
+    background: rgba(255, 68, 68, 0.9);
+    transform: scale(1.1);
 }
 
 /* Upload Button */
@@ -579,18 +651,57 @@ async function deleteClient(clientName, displayName) {
     }
 }
 
-// Display selected files in UI
+// Keep track of files to be uploaded
+let selectedFiles = [];
+
+// Display selected files in UI with thumbnails and remove buttons
 fileInput.addEventListener('change', () => {
-    fileList.innerHTML = '';
     if (fileInput.files.length > 0) {
         [...fileInput.files].forEach(file => {
-            const item = document.createElement('div');
-            item.className = 'file-item';
-            item.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-            fileList.appendChild(item);
+            // Avoid duplicates
+            if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                selectedFiles.push(file);
+            }
         });
+        
+        // Reset fileInput value so user can select the same file again if they deleted it
+        fileInput.value = '';
+        renderFilePreviews();
     }
 });
+
+// Render selected file preview cards
+function renderFilePreviews() {
+    fileList.innerHTML = '';
+    
+    if (selectedFiles.length === 0) {
+        return;
+    }
+
+    selectedFiles.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        
+        // Generate temporary preview URL
+        const imgUrl = URL.createObjectURL(file);
+        
+        item.innerHTML = `
+            <img src="${imgUrl}" alt="Preview" onload="URL.revokeObjectURL(this.src)">
+            <div class="file-item-remove" onclick="removeSelectedFile(${index})">&times;</div>
+            <div class="file-item-overlay">
+                <div class="file-item-name" title="${file.name}">${file.name}</div>
+                <div class="file-item-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+            </div>
+        `;
+        fileList.appendChild(item);
+    });
+}
+
+// Remove specific file from selection list
+window.removeSelectedFile = function(index) {
+    selectedFiles.splice(index, 1);
+    renderFilePreviews();
+};
 
 // Upload Photos
 uploadForm.addEventListener('submit', (e) => {
@@ -603,20 +714,19 @@ uploadForm.addEventListener('submit', (e) => {
         return;
     }
 
-    const files = [...fileInput.files];
-    if (files.length === 0) {
+    if (selectedFiles.length === 0) {
         alert("Please select at least one photo to upload.");
         return;
     }
 
     const formData = new FormData();
     formData.append('clientName', selectedClient);
-    files.forEach(file => {
+    selectedFiles.forEach(file => {
         formData.append('photos', file);
     });
 
     // Calculate total size in MB
-    const totalBytes = files.reduce((acc, f) => acc + f.size, 0);
+    const totalBytes = selectedFiles.reduce((acc, f) => acc + f.size, 0);
     const totalMB = (totalBytes / 1024 / 1024).toFixed(2);
 
     const progressContainer = document.getElementById('progressContainer');
@@ -629,7 +739,7 @@ uploadForm.addEventListener('submit', (e) => {
     progressContainer.style.display = 'block';
     progressBarFill.style.width = '0%';
     progressPercent.textContent = '0%';
-    progressState.textContent = `Uploading ${files.length} photo(s)...`;
+    progressState.textContent = `Uploading ${selectedFiles.length} photo(s)...`;
     progressBytes.textContent = `0.00 MB of ${totalMB} MB`;
 
     // Disable upload button
@@ -672,6 +782,7 @@ uploadForm.addEventListener('submit', (e) => {
                     uploadStatus.style.display = 'block';
                     
                     // Clear inputs
+                    selectedFiles = [];
                     fileInput.value = '';
                     fileList.innerHTML = '';
                     
