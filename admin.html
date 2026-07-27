@@ -729,7 +729,7 @@ function uploadSingleFile(clientName, file, onProgress) {
                         let errorMsg = `HTTP Error ${xhr.status}`;
                         try {
                             const errObj = JSON.parse(responseText);
-                            errorMsg = errObj.error || errorMsg;
+                            errorMsg = (errObj.details || errObj.error) || errorMsg;
                         } catch(e) {}
                         reject(new Error(errorMsg));
                     }

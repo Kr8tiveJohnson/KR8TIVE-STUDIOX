@@ -183,10 +183,13 @@ router.post('/upload', auth, upload.array('photos'), async (req, res) => {
 
             // Check if Vercel Blob token is set to determine if we run in Cloud environment
             if (process.env.BLOB_READ_WRITE_TOKEN) {
-                // Upload directly to Vercel Blob
+                // Upload directly to Vercel Blob (pass token explicitly for serverless compatibility)
                 const blobPath = `uploads/${clientName}/${Date.now()}-${file.originalname}`;
-                const blob = await put(blobPath, file.buffer, { access: 'public' });
-                fileReference = blob.url; // URL becomes the filename reference
+                const blob = await put(blobPath, file.buffer, { 
+                    access: 'public',
+                    token: process.env.BLOB_READ_WRITE_TOKEN
+                });
+                fileReference = blob.url; // Public HTTPS URL stored as the filename reference
             } else {
                 // Local disk storage fallback
                 const uniqueName = `${Date.now()}-${file.originalname}`;
