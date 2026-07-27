@@ -19,14 +19,16 @@ router.get('/debug-db', async (req, res) => {
         res.json({ 
             success: true, 
             time: testRes.rows[0].now,
-            tables: tablesRes.rows.map(r => r.table_name)
+            tables: tablesRes.rows.map(r => r.table_name),
+            hasBlobToken: process.env.BLOB_READ_WRITE_TOKEN !== undefined,
+            blobKeys: Object.keys(process.env).filter(key => key.includes('BLOB_'))
         });
     } catch (err) {
         res.status(500).json({
             success: false,
             error: err.message,
             stack: err.stack,
-            envKeys: Object.keys(process.env).filter(key => key.includes('POSTGRES') || key.includes('DATABASE') || key.includes('DB_'))
+            envKeys: Object.keys(process.env).filter(key => key.includes('POSTGRES') || key.includes('DATABASE') || key.includes('DB_') || key.includes('BLOB_'))
         });
     }
 });
