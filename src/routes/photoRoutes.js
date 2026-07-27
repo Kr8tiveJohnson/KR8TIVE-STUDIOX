@@ -208,7 +208,11 @@ router.post('/upload', auth, upload.array('photos'), async (req, res) => {
         res.status(200).json({ message: "Upload completed successfully", count: files.length });
     } catch (err) {
         console.error("Failed to record uploads in database:", err);
-        res.status(500).json({ error: "Database registration failure during file upload" });
+        res.status(500).json({ 
+            error: "Database registration failure during file upload",
+            details: err.message,
+            stack: err.stack
+        });
     }
 });
 
