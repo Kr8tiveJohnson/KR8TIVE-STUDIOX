@@ -4,266 +4,332 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>KR8TIVE STUDIOX | Upload Portal</title>
+<title>KR8TIVE STUDIOX | Admin Dashboard</title>
+
+<!-- Preload logo & favicon -->
+<link rel="preload" as="image" href="/public/logo.png">
+<link rel="icon" type="image/png" href="/public/favicon.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-body{
-    font-family:'Inter',sans-serif;
-    background:#f8f8f8;
-    color:#111;
-    min-height:100vh;
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f8f8f8;
+    color: #111;
+    min-height: 100vh;
 }
 
-.container{
-    max-width:1200px;
-    margin:auto;
-    padding:50px 25px;
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 50px 25px;
 }
 
 /* Header */
-
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    margin-bottom:70px;
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 50px;
 }
 
-.logo{
-    font-size:.85rem;
-    letter-spacing:3px;
-    font-weight:700;
-    color:#666;
-    text-transform:uppercase;
+.logo {
+    font-size: .85rem;
+    letter-spacing: 3px;
+    font-weight: 700;
+    color: #666;
+    text-transform: uppercase;
 }
 
-.header h1{
-    font-size:4.5rem;
-    font-weight:800;
-    letter-spacing:-3px;
-    line-height:.95;
-    margin-top:10px;
+.header h1 {
+    font-size: 4.5rem;
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: .95;
+    margin-top: 10px;
 }
 
-.header p{
-    max-width:260px;
-    color:#777;
-    line-height:1.7;
-    font-size:.95rem;
+.header p {
+    max-width: 260px;
+    color: #777;
+    line-height: 1.7;
+    font-size: .95rem;
 }
 
-/* Upload Card */
-
-.upload-card{
-    background:white;
-    border-radius:28px;
-    padding:50px;
-    box-shadow:
-    0 10px 40px rgba(0,0,0,.04);
-
-    border:1px solid #eee;
+/* Cards */
+.upload-card, .manage-card {
+    background: white;
+    border-radius: 28px;
+    padding: 50px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.04);
+    border: 1px solid #eee;
+    margin-bottom: 40px;
 }
 
-.upload-card h2{
-    font-size:2rem;
-    margin-bottom:10px;
+.upload-card h2, .manage-card h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
 }
 
-.upload-card .subtitle{
-    color:#777;
-    margin-bottom:35px;
+.subtitle {
+    color: #777;
+    margin-bottom: 35px;
 }
 
 /* Drop Zone */
-
-.drop-zone{
-    border:2px dashed #d4d4d8;
-    border-radius:20px;
-
-    padding:60px 30px;
-
-    text-align:center;
-
-    cursor:pointer;
-
-    transition:.3s;
-
-    background:#fafafa;
+.drop-zone {
+    border: 2px dashed #d4d4d8;
+    border-radius: 20px;
+    padding: 60px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: .3s;
+    background: #fafafa;
+    display: block;
 }
 
-.drop-zone:hover{
-    border-color:#111;
-    background:#fff;
+.drop-zone:hover {
+    border-color: #111;
+    background: #fff;
 }
 
-.drop-zone svg{
-    width:50px;
-    height:50px;
-    margin-bottom:20px;
-    opacity:.7;
+.drop-zone svg {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 20px;
+    opacity: .7;
 }
 
-.drop-zone h3{
-    font-size:1.2rem;
-    margin-bottom:8px;
+.drop-zone h3 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
 }
 
-.drop-zone p{
-    color:#777;
+.drop-zone p {
+    color: #777;
 }
 
-input[type="file"]{
-    display:none;
+input[type="file"] {
+    display: none;
 }
 
 /* File List */
-
-.file-list{
-    margin-top:25px;
+.file-list {
+    margin-top: 25px;
 }
 
-.file-item{
-    background:#fafafa;
-    border:1px solid #eee;
-    border-radius:14px;
-    padding:14px 18px;
-    margin-bottom:10px;
-    font-size:.95rem;
+.file-item {
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    font-size: .95rem;
 }
 
 /* Upload Button */
-
-.upload-btn{
-    margin-top:30px;
-
-    width:100%;
-
-    border:none;
-
-    padding:18px;
-
-    border-radius:16px;
-
-    background:#111;
-    color:white;
-
-    font-size:1rem;
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:.3s;
+.upload-btn {
+    margin-top: 30px;
+    width: 100%;
+    border: none;
+    padding: 18px;
+    border-radius: 16px;
+    background: #111;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .3s;
 }
 
-.upload-btn:hover{
-    background:#000;
-    transform:translateY(-2px);
+.upload-btn:hover {
+    background: #000;
+    transform: translateY(-2px);
 }
 
 /* Status */
-
-.status{
-    margin-top:20px;
-    padding:15px;
-    border-radius:14px;
-    display:none;
+.status {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 14px;
+    display: none;
 }
 
-.success{
-    background:#ecfdf5;
-    color:#065f46;
+.success {
+    background: #ecfdf5;
+    color: #065f46;
+    display: block;
 }
 
-.error{
-    background:#fef2f2;
-    color:#991b1b;
+.error {
+    background: #fef2f2;
+    color: #991b1b;
+    display: block;
+}
+
+/* Assets Management Grid */
+.manage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.asset-item {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f0f0f0;
+    border: 1px solid #eee;
+    aspect-ratio: 1;
+}
+
+.asset-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.asset-item:hover img {
+    transform: scale(1.05);
+}
+
+.delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(220, 38, 38, 0.95);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: 0.2s;
+    backdrop-filter: blur(4px);
+}
+
+.delete-btn:hover {
+    background: rgb(220, 38, 38);
+    transform: scale(1.05);
+}
+
+/* Table Style */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    text-align: left;
+}
+
+th, td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover td {
+    background: #fafafa;
 }
 
 /* Responsive */
-
-@media(max-width:768px){
-
-.header{
-    flex-direction:column;
-    gap:25px;
+@media(max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 25px;
+    }
+    
+    .header h1 {
+        font-size: 3rem;
+    }
+    
+    .upload-card, .manage-card {
+        padding: 30px;
+    }
 }
-
-.header h1{
-    font-size:3rem;
-}
-
-.upload-card{
-    padding:30px;
-}
-
-}
-
-/* Management Section Styles */
-.manage-card {
-    margin-top: 40px;
-    background: white;
-    padding: 50px;
-    border-radius: 28px;
-    box-shadow: 0 10px 40px rgba(0,0,0,.04);
-    border: 1px solid #eee;
-}
-.manage-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
-.asset-item {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #f0f0f0;
-}
-.asset-item img { width: 100%; height: 100px; object-fit: cover; }
-.delete-btn {
-    position: absolute; top: 5px; right: 5px;
-    background: #ff4444; color: white; border: none;
-    padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem;
-}
-
 </style>
 </head>
 <body>
 
 <div class="container">
 
+    <!-- Header -->
     <div class="header">
         <div>
-            <div class="logo">KR8TIVE STUDIOX</div>
-            <h1>Upload Portal</h1>
+            <img src="/public/logo.png" alt="KR8TIVE STUDIOX Logo" style="height: 42px; margin-bottom: 10px; display: block; object-fit: contain;">
+            <h1>Admin Dashboard</h1>
         </div>
         <p>
-            Securely upload event photos and media files
-            to the gallery management system.
+            Create private client collections, manage Access PINs, and upload photography galleries.
         </p>
     </div>
 
+    <!-- Client Collections Manager -->
+    <div class="manage-card">
+        <h2>Client Collections</h2>
+        <p class="subtitle">Register collections with unique client codes, display names, and private entry PINs.</p>
+        
+        <!-- Create Client Form -->
+        <form id="createClientForm" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; background: #fafafa; padding: 25px; border-radius: 18px; border: 1px solid #eee;">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 5px;">Create New Collection</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #555;">Display Name</label>
+                    <input type="text" id="newDisplayName" placeholder="e.g. Joshua & Sarah's Wedding" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 0.95rem;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #555;">Client Code (Slug)</label>
+                    <input type="text" id="newClientName" placeholder="e.g. joshua-wedding-2026" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 0.95rem;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #555;">Access PIN Code</label>
+                    <input type="text" id="newClientPin" placeholder="e.g. JOSHUA2026" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 0.95rem;">
+                </div>
+            </div>
+            <button type="submit" class="upload-btn" style="margin-top: 10px; padding: 12px 24px; font-size: 0.95rem; width: auto; align-self: flex-start;">Create Collection</button>
+            <div id="createClientStatus" class="status"></div>
+        </form>
+
+        <!-- Collections Table -->
+        <div style="overflow-x: auto; margin-top: 25px;">
+            <table>
+                <thead>
+                    <tr style="border-bottom: 2px solid #eee; color: #555;">
+                        <th style="font-weight: 600;">Display Name</th>
+                        <th style="font-weight: 600;">Client Code</th>
+                        <th style="font-weight: 600;">Access PIN</th>
+                        <th style="font-weight: 600;">Photos</th>
+                        <th style="font-weight: 600; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="clientListBody">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #777;">Loading collections...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Upload Event Photos -->
     <div class="upload-card">
-        <h2>Upload Event Photos</h2>
-        <p class="subtitle">
-            Enter the client code and select your photos to begin.
-        </p>
+        <h2>Upload Photos</h2>
+        <p class="subtitle">Select a client collection and upload high-resolution images.</p>
 
         <form id="uploadForm" enctype="multipart/form-data">
-
-            <!-- Added Client Name Input -->
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label for="clientName" style="display: block; margin-bottom: 8px; font-weight: bold;">Client Name / Project Code</label>
-                <input type="text" id="clientName" name="clientName" placeholder="e.g. joshua-wedding-2026" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+            <div class="form-group" style="margin-bottom: 25px;">
+                <label for="clientSelect" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Select Client Collection</label>
+                <select id="clientSelect" name="clientName" required style="width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; background: white; font-family: inherit; font-size: 0.95rem; outline: none; cursor: pointer;">
+                    <option value="" disabled selected>Choose a collection...</option>
+                </select>
             </div>
 
             <label class="drop-zone" for="fileInput">
@@ -280,102 +346,384 @@ input[type="file"]{
                 name="photos"
                 multiple
                 required
-                style="display: none;" 
             >
 
             <div id="fileList" class="file-list"></div>
 
             <button type="submit" class="upload-btn">
-                Upload Photos
+                Upload Photos to Selected Collection
             </button>
 
-            <div id="status" class="status"></div>
-
+            <div id="uploadStatus" class="status"></div>
         </form>
     </div>
+
+    <!-- Manage Assets (Hidden until collection selected) -->
+    <div class="manage-card" id="assetsCard" style="display: none;">
+        <h2>Manage Collection Assets: <span id="currentManagedClient" style="color: #666; font-size: 1.35rem; font-weight: 400;"></span></h2>
+        <p class="subtitle">View and delete individual photo uploads below.</p>
+        <div id="manageGrid" class="manage-grid"></div>
+    </div>
+
+    <!-- Contact Messages Manager -->
+    <div class="manage-card">
+        <h2>Contact Messages</h2>
+        <p class="subtitle">View messages sent from the client gallery pages.</p>
+        <div style="overflow-x: auto; margin-top: 25px;">
+            <table>
+                <thead>
+                    <tr style="border-bottom: 2px solid #eee; color: #555;">
+                        <th style="font-weight: 600; width: 15%;">Date</th>
+                        <th style="font-weight: 600; width: 20%;">Collection</th>
+                        <th style="font-weight: 600; width: 15%;">Name</th>
+                        <th style="font-weight: 600; width: 20%;">Email</th>
+                        <th style="font-weight: 600; width: 20%;">Message</th>
+                        <th style="font-weight: 600; width: 10%; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="messageListBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #777; padding: 20px;">Loading messages...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
-<div class="manage-card">
-    <h2>Manage Assets</h2>
-    <div id="manageGrid" class="manage-grid"></div>
-</div>
 <script>
 const fileInput = document.getElementById('fileInput');
 const fileList = document.getElementById('fileList');
-const statusBox = document.getElementById('status');
-const clientInput = document.getElementById('clientName'); // Added reference
+const uploadForm = document.getElementById('uploadForm');
+const uploadStatus = document.getElementById('uploadStatus');
+const clientSelect = document.getElementById('clientSelect');
+const createClientForm = document.getElementById('createClientForm');
+const createClientStatus = document.getElementById('createClientStatus');
+const clientListBody = document.getElementById('clientListBody');
+const assetsCard = document.getElementById('assetsCard');
+const currentManagedClient = document.getElementById('currentManagedClient');
+const manageGrid = document.getElementById('manageGrid');
+const messageListBody = document.getElementById('messageListBody');
 
-// Display files in UI
-fileInput.addEventListener('change', () => {
-    fileList.innerHTML = '';
-    [...fileInput.files].forEach(file => {
-        const item = document.createElement('div');
-        item.className = 'file-item';
-        item.textContent = file.name;
-        fileList.appendChild(item);
-    });
+// Fetch and load clients
+async function loadClients() {
+    try {
+        const res = await fetch('/api/admin/clients');
+        if (!res.ok) throw new Error("Unauthorized or server error");
+        const clients = await res.json();
+        
+        // Save current dropdown value
+        const previousSelection = clientSelect.value;
+        
+        // 1. Populate Dropdown
+        clientSelect.innerHTML = '<option value="" disabled selected>Choose a collection...</option>';
+        clients.forEach(client => {
+            const opt = document.createElement('option');
+            opt.value = client.client_name;
+            opt.textContent = `${client.display_name} (${client.client_name})`;
+            clientSelect.appendChild(opt);
+        });
+        
+        // Keep selection if it still exists
+        if (previousSelection && clients.some(c => c.client_name === previousSelection)) {
+            clientSelect.value = previousSelection;
+        }
+
+        // 2. Populate Collections Table
+        clientListBody.innerHTML = '';
+        if (clients.length === 0) {
+            clientListBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #777; padding: 20px;">No client collections registered.</td></tr>`;
+        } else {
+            clients.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight: 500; padding: 12px 10px;">${c.display_name}</td>
+                    <td style="font-family: monospace; color: #666; padding: 12px 10px;">${c.client_name}</td>
+                    <td style="font-weight: 600; color: #111; padding: 12px 10px;">${c.pin}</td>
+                    <td style="color: #666; padding: 12px 10px;">${c.photo_count} file(s)</td>
+                    <td style="text-align: right; padding: 12px 10px;">
+                        <button onclick="selectClient('${c.client_name}')" style="background: #111; color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; margin-right: 5px; transition: 0.2s;">Manage</button>
+                        <button onclick="deleteClient('${c.client_name}', '${c.display_name}')" style="background: #ff4444; color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: 0.2s;">Delete</button>
+                    </td>
+                `;
+                clientListBody.appendChild(tr);
+            });
+        }
+    } catch (err) {
+        console.error("Error loading collections:", err);
+        clientListBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ff4444; padding: 20px;">Failed to load collections. Check server logs.</td></tr>`;
+    }
+}
+
+// Select a client to manage photos
+function selectClient(clientName) {
+    clientSelect.value = clientName;
+    loadAssets();
+}
+
+// Create a new client collection
+createClientForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    createClientStatus.style.display = 'none';
+    
+    const displayName = document.getElementById('newDisplayName').value;
+    const clientName = document.getElementById('newClientName').value;
+    const pin = document.getElementById('newClientPin').value;
+
+    try {
+        const res = await fetch('/api/admin/clients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ clientName, displayName, pin })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+            createClientStatus.className = 'status success';
+            createClientStatus.textContent = `Success! Registered collection "${data.display_name}" with PIN "${data.pin}".`;
+            createClientStatus.style.display = 'block';
+            
+            // Reset form fields
+            createClientForm.reset();
+            
+            // Reload list and dropdown
+            await loadClients();
+        } else {
+            createClientStatus.className = 'status error';
+            createClientStatus.textContent = data.error || 'Failed to create collection.';
+            createClientStatus.style.display = 'block';
+        }
+    } catch (err) {
+        console.error("Create collection error:", err);
+        createClientStatus.className = 'status error';
+        createClientStatus.textContent = 'Server communication error occurred.';
+        createClientStatus.style.display = 'block';
+    }
 });
 
-// Submit Form
-document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+// Delete client collection
+async function deleteClient(clientName, displayName) {
+    if (!confirm(`WARNING: Are you sure you want to delete the collection "${displayName}" (${clientName})?\nThis will permanently delete the collection and all its uploaded photos from disk & database.`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/admin/clients/${encodeURIComponent(clientName)}`, {
+            method: 'DELETE'
+        });
+
+        if (res.ok) {
+            // If the deleted client was selected, hide the assets card
+            if (clientSelect.value === clientName) {
+                clientSelect.value = '';
+                assetsCard.style.display = 'none';
+            }
+            await loadClients();
+        } else {
+            alert("Failed to delete client collection.");
+        }
+    } catch (err) {
+        console.error("Delete client error:", err);
+        alert("Failed to delete client collection due to connection error.");
+    }
+}
+
+// Display selected files in UI
+fileInput.addEventListener('change', () => {
+    fileList.innerHTML = '';
+    if (fileInput.files.length > 0) {
+        [...fileInput.files].forEach(file => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            fileList.appendChild(item);
+        });
+    }
+});
+
+// Upload Photos
+uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    uploadStatus.style.display = 'none';
+    
+    const selectedClient = clientSelect.value;
+    if (!selectedClient) {
+        alert("Please select a client collection first.");
+        return;
+    }
 
     const formData = new FormData();
-    // Ensure this ID matches the input in your HTML
-    const clientName = document.getElementById('clientName').value; 
-    formData.append('clientName', clientName);
-
+    formData.append('clientName', selectedClient);
     [...fileInput.files].forEach(file => {
         formData.append('photos', file);
     });
 
     try {
+        uploadStatus.className = 'status';
+        uploadStatus.textContent = 'Uploading files...';
+        uploadStatus.style.display = 'block';
+
         const response = await fetch('/api/upload', {
             method: 'POST',
-            body: formData 
+            body: formData
         });
 
+        const result = await response.json();
+
         if (response.ok) {
-            // Success logic
+            uploadStatus.className = 'status success';
+            uploadStatus.textContent = `Upload successful! Added ${result.count || 0} photo(s).`;
+            uploadStatus.style.display = 'block';
+            
+            // Clear file list
+            fileInput.value = '';
+            fileList.innerHTML = '';
+            
+            // Refresh clients (updates photo counts) and reload assets grid
+            await loadClients();
             loadAssets();
         } else {
-            // Handle error
-            const result = await response.json();
-            console.error("Server Error:", result);
+            uploadStatus.className = 'status error';
+            uploadStatus.textContent = result.error || 'Server error uploading files.';
+            uploadStatus.style.display = 'block';
         }
-    } catch(error) {
-        console.error("Fetch Error:", error);
+    } catch (error) {
+        console.error("Upload error:", error);
+        uploadStatus.className = 'status error';
+        uploadStatus.textContent = 'Connection error uploading files.';
+        uploadStatus.style.display = 'block';
     }
 });
-// Fetch files based on client name
+
+// Load photo assets for currently selected client
 async function loadAssets() {
-    const clientName = document.getElementById('clientName').value || 'uncategorized';
-    // Matches the new GET route: /api/photos/:clientName
-    const res = await fetch(`/api/photos/${encodeURIComponent(clientName)}`);
-    const files = await res.json();
-    
-    const grid = document.getElementById('manageGrid');
-    grid.innerHTML = '';
-    
-    files.forEach(file => {
-        grid.innerHTML += `
-            <div class="asset-item">
-                <img src="/uploads/${encodeURIComponent(clientName)}/${encodeURIComponent(file)}">
-                <button onclick="deleteFile('${file}')">Delete</button>
-            </div>
-        `;
-    });
+    const clientName = clientSelect.value;
+    if (!clientName) {
+        assetsCard.style.display = 'none';
+        return;
+    }
+
+    try {
+        currentManagedClient.textContent = clientName;
+        assetsCard.style.display = 'block';
+        
+        const res = await fetch(`/api/photos/${encodeURIComponent(clientName)}`);
+        const files = await res.json();
+        
+        manageGrid.innerHTML = '';
+        if (files.length === 0) {
+            manageGrid.innerHTML = `<p style="grid-column: 1 / -1; color: #777; text-align: center; padding: 20px;">No photos uploaded to this collection yet.</p>`;
+            return;
+        }
+
+        files.forEach(file => {
+            const item = document.createElement('div');
+            item.className = 'asset-item';
+            item.innerHTML = `
+                <img src="/uploads/${encodeURIComponent(clientName)}/${encodeURIComponent(file)}" alt="Asset Thumbnail">
+                <button class="delete-btn" onclick="deleteFile('${file}')">Delete</button>
+            `;
+            manageGrid.appendChild(item);
+        });
+    } catch (error) {
+        console.error("Load assets error:", error);
+        manageGrid.innerHTML = `<p style="grid-column: 1 / -1; color: #ff4444; text-align: center; padding: 20px;">Error loading collection assets.</p>`;
+    }
 }
 
-// Delete file based on client name
+// Delete individual photo asset
 async function deleteFile(filename) {
-    const clientName = document.getElementById('clientName').value;
-    // Matches the new DELETE route: /api/photos/:clientName/:filename
-    const res = await fetch(`/api/photos/${encodeURIComponent(clientName)}/${encodeURIComponent(filename)}`, { 
-        method: 'DELETE' 
-    });
-    if (res.ok) loadAssets();
+    const clientName = clientSelect.value;
+    if (!clientName) return;
+
+    if (!confirm(`Are you sure you want to delete the file "${filename}"?`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/photos/${encodeURIComponent(clientName)}/${encodeURIComponent(filename)}`, {
+            method: 'DELETE'
+        });
+        
+        if (res.ok) {
+            await loadClients();
+            loadAssets();
+        } else {
+            alert("Failed to delete photo asset.");
+        }
+    } catch (err) {
+        console.error("Delete photo error:", err);
+        alert("Failed to delete photo due to connection error.");
+    }
 }
+
+// Listen to dropdown changes to automatically show assets
+clientSelect.addEventListener('change', loadAssets);
+
+// Fetch and load contact messages
+async function loadMessages() {
+    try {
+        const res = await fetch('/api/admin/messages');
+        if (!res.ok) throw new Error("Unauthorized or server error");
+        const messages = await res.json();
+        
+        messageListBody.innerHTML = '';
+        if (messages.length === 0) {
+            messageListBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #777; padding: 20px;">No messages received.</td></tr>`;
+        } else {
+            messages.forEach(msg => {
+                const date = new Date(msg.created_at).toLocaleString();
+                const collectionName = msg.client_display_name 
+                    ? `<strong>${msg.client_display_name}</strong> <br><span style="font-size:0.75rem; color:#888; font-family:monospace;">(${msg.client_slug})</span>` 
+                    : `<span style="color:#aaa; font-style:italic;">General Website</span>`;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding: 12px 10px; color: #555; font-size: 0.85rem;">${date}</td>
+                    <td style="padding: 12px 10px; font-size: 0.9rem;">${collectionName}</td>
+                    <td style="padding: 12px 10px; font-weight: 600;">${msg.name}</td>
+                    <td style="padding: 12px 10px; color: #555;"><a href="mailto:${msg.email}" style="color: #666; text-decoration: underline;">${msg.email}</a></td>
+                    <td style="padding: 12px 10px; font-weight: 300; line-height: 1.5; color: #222; font-size: 0.9rem;">${msg.message}</td>
+                    <td style="padding: 12px 10px; text-align: right;">
+                        <button onclick="deleteMessage(${msg.id})" style="background: #ff4444; color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: 0.2s;">Delete</button>
+                    </td>
+                `;
+                messageListBody.appendChild(tr);
+            });
+        }
+    } catch (err) {
+        console.error("Error loading messages:", err);
+        messageListBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ff4444; padding: 20px;">Failed to load messages. Check server logs.</td></tr>`;
+    }
+}
+
+// Delete contact message
+async function deleteMessage(id) {
+    if (!confirm("Are you sure you want to delete this message?")) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/admin/messages/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (res.ok) {
+            loadMessages();
+        } else {
+            alert("Failed to delete contact message.");
+        }
+    } catch (err) {
+        console.error("Delete message error:", err);
+        alert("Failed to delete message due to connection error.");
+    }
+}
+
+// Initial bootstrap load
+loadClients();
+loadMessages();
 </script>
 
 </body>

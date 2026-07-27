@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KR8TIVE STUDIOX | Private Collection</title>
     
+    <!-- Favicon – multiple formats for browser compatibility -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/favicon.png">
+
+    <!-- Preload logo image for instant render -->
+    <link rel="preload" as="image" href="/public/logo.png">
+    
     <!-- Better Typography: Elegant & Modern -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -134,37 +143,59 @@
             text-transform: uppercase;
         }
 
-        /* Masonry Layout Setup */
+        /* Masonry Layout Setup - Mobile First 2 columns */
         #gallery-grid {
-            column-count: 1;
-            column-gap: 24px;
+            column-count: 2;
+            column-gap: 12px;
         }
-        @media (min-width: 640px) { #gallery-grid { column-count: 2; } }
-        @media (min-width: 1024px) { #gallery-grid { column-count: 3; } }
-        @media (min-width: 1440px) { #gallery-grid { column-count: 4; } }
+        @media (min-width: 768px) { 
+            #gallery-grid { 
+                column-count: 3; 
+                column-gap: 20px; 
+            } 
+        }
+        @media (min-width: 1200px) { 
+            #gallery-grid { 
+                column-count: 4; 
+                column-gap: 24px; 
+            } 
+        }
 
         /* --- Image Cards & Hover Animations --- */
         .photo-card {
             position: relative;
             break-inside: avoid;
-            margin-bottom: 24px;
-            border-radius: 16px;
+            margin-bottom: 12px;
+            border-radius: 10px;
             overflow: hidden;
             background: #111;
             cursor: pointer;
+        }
+
+        @media (min-width: 768px) {
+            .photo-card {
+                margin-bottom: 20px;
+                border-radius: 16px;
+            }
         }
 
         /* Image Zoom on Hover */
         .photo-card img {
             width: 100%;
             display: block;
-            border-radius: 16px;
+            border-radius: 10px;
             transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
             will-change: transform;
         }
 
+        @media (min-width: 768px) {
+            .photo-card img {
+                border-radius: 16px;
+            }
+        }
+
         .photo-card:hover img {
-            transform: scale(1.05);
+            transform: scale(1.04);
         }
 
         /* Dark Gradient Overlay on Hover */
@@ -172,54 +203,194 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 50%);
-            opacity: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 50%);
+            opacity: 1; /* Keep visible on mobile for contrast behind text/button */
             transition: opacity 0.4s ease;
             pointer-events: none;
         }
 
-        .photo-card:hover::after {
-            opacity: 1;
+        @media (min-width: 768px) {
+            .photo-card::after {
+                opacity: 0;
+            }
+            .photo-card:hover::after {
+                opacity: 1;
+            }
         }
 
         /* Floating Download Button */
         .download-btn {
             position: absolute;
-            bottom: 24px;
+            bottom: 10px;
             left: 50%;
-            transform: translate(-50%, 20px);
-            opacity: 0;
+            transform: translate(-50%, 0);
+            opacity: 1;
             z-index: 10;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--glass-border);
             color: #fff;
-            padding: 10px 24px;
-            border-radius: 30px;
-            font-size: 0.9rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
             font-weight: 500;
             text-decoration: none;
             letter-spacing: 0.05em;
             transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        .photo-card:hover .download-btn {
-            transform: translate(-50%, 0);
-            opacity: 1;
-        }
-
         .download-btn:hover {
             background: #fff;
             color: #000;
+        }
+
+        @media (min-width: 768px) {
+            .download-btn {
+                bottom: 24px;
+                transform: translate(-50%, 15px);
+                opacity: 0;
+                background: var(--glass-bg);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                padding: 10px 24px;
+                border-radius: 30px;
+                font-size: 0.9rem;
+            }
+
+            .photo-card:hover .download-btn {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        /* --- Splash / Preload Screen --- */
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #070709;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        #splash-screen.hide {
+            opacity: 0;
+            transform: scale(1.04);
+            pointer-events: none;
+        }
+
+        #splash-logo {
+            width: clamp(160px, 28vw, 280px);
+            filter: invert(1);
+            opacity: 0;
+            transform: translateY(18px);
+            animation: splashLogoIn 0.9s cubic-bezier(0.25, 1, 0.5, 1) 0.2s forwards;
+        }
+
+        #splash-tagline {
+            font-size: 0.75rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.35);
+            opacity: 0;
+            animation: splashLogoIn 0.9s cubic-bezier(0.25, 1, 0.5, 1) 0.5s forwards;
+        }
+
+        #splash-bar-wrap {
+            width: 120px;
+            height: 1px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 4px;
+            overflow: hidden;
+            opacity: 0;
+            animation: splashLogoIn 0.5s ease 0.7s forwards;
+        }
+
+        #splash-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+            animation: splashBarFill 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.8s forwards;
+        }
+
+        @keyframes splashLogoIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes splashBarFill {
+            to { width: 100%; }
+        }
+
+        /* --- About & Contact Grid Layout --- */
+        .footer-container {
+            margin-top: 100px;
+            padding: 40px 20px;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(15, 15, 20, 0.4);
+            border-radius: 24px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            text-align: left;
+        }
+
+        /* Responsive alignment for Tablet and Desktop */
+        @media (min-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+            .footer-about-col {
+                grid-column: span 2;
+                border-bottom: 1px solid var(--glass-border);
+                padding-bottom: 30px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .footer-container {
+                padding: 60px 45px;
+            }
+            .footer-grid {
+                grid-template-columns: 1.2fr 0.9fr 0.9fr;
+                gap: 50px;
+            }
+            .footer-about-col {
+                grid-column: span 1;
+                border-bottom: none;
+                padding-bottom: 0;
+            }
         }
     </style>
 </head>
 <body>
 
+    <!-- Animated Splash / Preload Screen -->
+    <div id="splash-screen">
+        <img id="splash-logo" src="/public/logo.png" alt="KR8TIVE STUDIOX">
+        <span id="splash-tagline">Private Collection</span>
+        <div id="splash-bar-wrap"><div id="splash-bar"></div></div>
+    </div>
+
     <!-- Full Screen Hero & Login Area -->
     <section id="hero-section">
         <div id="login-card">
-            <h2>KR8TIVE STUDIOX</h2>
+            <!-- Logo added to client login card -->
+            <img src="/public/logo.png" alt="KR8TIVE STUDIOX" style="width: 200px; margin-bottom: 25px; filter: invert(1); mix-blend-mode: screen;">
             <p>Private Event Collection</p>
             <input type="password" id="accessCode" placeholder="Enter PIN">
             <button id="login-btn" onclick="checkAccess()">View Gallery</button>
@@ -228,74 +399,220 @@
 
     <!-- Gallery Section (Hidden by Default) -->
     <section id="gallery-section">
-        <div class="gallery-header">
-            <h1 id="gallery-title">KR8TIVE STUDIOX | Collection</h1>
+        <div class="gallery-header" style="text-align: center; margin-bottom: 50px;">
+            <!-- Logo added to gallery header -->
+            <img src="/public/logo.png" alt="KR8TIVE STUDIOX" style="width: 150px; margin-bottom: 20px; filter: invert(1); mix-blend-mode: screen;">
+            <h1 id="gallery-title">Collection</h1>
         </div>
         <div id="gallery-grid"></div>
+
+        <!-- About & Contact Section -->
+        <section id="about-contact-section" class="footer-container">
+            <div class="footer-grid">
+                
+                <!-- About Me -->
+                <div class="footer-about-col">
+                    <h2 style="font-size: 1.3rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; color: var(--text-main);">About the Studio</h2>
+                    <p style="color: var(--text-main); font-weight: 500; line-height: 1.6; font-size: 0.95rem; margin-bottom: 15px; letter-spacing: 0.05em; text-transform: uppercase;">
+                        CAPTURE THE MOMENT. PRESERVE THE MEMORY.
+                    </p>
+                    <p style="color: var(--text-muted); font-weight: 300; line-height: 1.8; font-size: 0.95rem; margin-bottom: 15px;">
+                        At KR8TIVE STUDIOX, we create more than photographs. We tell stories that last a lifetime. From elegant weddings, Birthday Party, Outdoor activities, Church Events and timeless portraits to lifestyle and editorial sessions, every image is carefully crafted to reflect genuine emotions, authentic connections, and beautiful details.
+                    </p>
+                    <p style="color: var(--text-muted); font-weight: 300; line-height: 1.8; font-size: 0.95rem; margin-bottom: 15px;">
+                        Our approach combines cinematic lighting, creative direction, and a refined artistic style to deliver photographs that feel both modern and timeless. Every collection is thoughtfully curated to ensure your memories remain as meaningful years from now as they are today.
+                    </p>
+                    <p style="color: var(--text-muted); font-weight: 300; line-height: 1.8; font-size: 0.95rem; margin-bottom: 15px;">
+                        Whether you're celebrating a milestone, building your personal brand, or documenting life's most unforgettable moments, we're honored to be part of your journey.
+                    </p>
+                    <p style="color: var(--text-muted); font-weight: 300; line-height: 1.8; font-size: 0.95rem;">
+                        Thank you for trusting KR8TIVE STUDIOX Private Collection to preserve your most cherished memories.
+                    </p>
+                </div>
+                
+                <!-- Contact Info -->
+                <div>
+                    <h2 style="font-size: 1.3rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; color: var(--text-main);">Get In Touch</h2>
+                    <p style="color: var(--text-muted); font-weight: 300; line-height: 1.8; font-size: 0.95rem; margin-bottom: 20px;">
+                        Have questions about downloading your collection, purchasing prints, or booking a future session? Reach out directly:
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px;">
+                        <a href="mailto:kr8tivejohnson@gmail.com" style="display: flex; align-items: center; gap: 12px; color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 400; transition: color 0.3s;" onmouseover="this.style.color='#a1a1a6'" onmouseout="this.style.color='var(--text-main)'">
+                            <svg style="width: 18px; height: 18px; opacity: 0.8;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            kr8tivejohnson@gmail.com
+                        </a>
+                        <a href="tel:+2349115190832" style="display: flex; align-items: center; gap: 12px; color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 400; transition: color 0.3s;" onmouseover="this.style.color='#a1a1a6'" onmouseout="this.style.color='var(--text-main)'">
+                            <svg style="width: 18px; height: 18px; opacity: 0.8;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            +234 911 519 0832
+                        </a>
+                        <a href="https://kr8tivejohnson.vercel.app/" target="_blank" style="display: flex; align-items: center; gap: 12px; color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 400; transition: color 0.3s;" onmouseover="this.style.color='#a1a1a6'" onmouseout="this.style.color='var(--text-main)'">
+                            <svg style="width: 18px; height: 18px; opacity: 0.8;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                            kr8tivejohnson.vercel.app
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Reach Out Message Form -->
+                <div>
+                    <h2 style="font-size: 1.3rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; color: var(--text-main);">Send a Message</h2>
+                    <form id="contactForm" style="display: flex; flex-direction: column; gap: 12px;">
+                        <input type="text" id="contactName" placeholder="Your Name" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.3s;">
+                        
+                        <input type="email" id="contactEmail" placeholder="Your Email" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.3s;">
+                        
+                        <textarea id="contactMessage" placeholder="Your Message" rows="4" required style="width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-family: inherit; font-size: 0.9rem; outline: none; resize: none; transition: border-color 0.3s;"></textarea>
+                        
+                        <button type="submit" id="contactSubmit" style="background: var(--accent-gradient); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;">Send Message</button>
+                        
+                        <div id="contactStatus" style="font-size: 0.85rem; margin-top: 5px; text-align: center; font-weight: 400; padding: 10px; border-radius: 6px; display: none;"></div>
+                    </form>
+                </div>
+                
+            </div>
+        </section>
     </section>
 
     <script>
-        function checkAccess() {
-            const code = document.getElementById('accessCode').value;
-            
-            if (code === "KR8TIVE2026") {
-                const loginCard = document.getElementById('login-card');
-                const heroSection = document.getElementById('hero-section');
-                const gallerySection = document.getElementById('gallery-section');
-                
-                // Smooth Fade Out of Login
-                loginCard.style.transform = 'translateY(-20px) scale(0.95)';
-                loginCard.style.opacity = '0';
-                
-                setTimeout(() => {
-                    loginCard.style.display = 'none';
-                    heroSection.style.height = 'auto'; // Collapse hero height
-                    heroSection.style.paddingTop = '60px'; 
-                    
-                    // Show & Fade In Gallery
-                    gallerySection.style.display = 'block';
-                    // Slight delay to allow display:block to register before changing opacity
-                    setTimeout(() => {
-                        gallerySection.style.opacity = '1';
-                        loadGallery();
-                    }, 50);
-                }, 500);
+        // --- Splash Screen Dismiss ---
+        window.addEventListener('load', () => {
+            // Total animation time: logo in (0.2+0.9=1.1s) + bar fill (0.8+1.2=2.0s) + buffer
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.classList.add('hide');
+                // Remove from DOM after transition so it doesn't block clicks
+                splash.addEventListener('transitionend', () => {
+                    splash.style.display = 'none';
+                }, { once: true });
+            }, 2200);
+        });
 
-            } else { 
-                alert("Incorrect PIN. Please try again."); 
+        async function checkAccess() {
+            const code = document.getElementById('accessCode').value.trim();
+            if (!code) {
+                alert("Please enter a PIN code.");
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/gallery/access', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ pin: code })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Store clientName globally for contact submissions
+                    window.currentClientName = data.clientName;
+
+                    // Update gallery heading to display the collection name
+                    document.getElementById('gallery-title').textContent = data.displayName;
+
+                    const loginCard = document.getElementById('login-card');
+                    const heroSection = document.getElementById('hero-section');
+                    const gallerySection = document.getElementById('gallery-section');
+                    
+                    // Smooth Fade Out of Login
+                    loginCard.style.transform = 'translateY(-20px) scale(0.95)';
+                    loginCard.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        loginCard.style.display = 'none';
+                        heroSection.style.height = 'auto'; // Collapse hero height
+                        heroSection.style.paddingTop = '60px'; 
+                        
+                        // Show & Fade In Gallery
+                        gallerySection.style.display = 'block';
+                        setTimeout(() => {
+                            gallerySection.style.opacity = '1';
+                            renderGallery(data.clientName, data.photos);
+                        }, 50);
+                    }, 500);
+
+                } else { 
+                    alert(data.error || "Incorrect PIN. Please try again."); 
+                }
+            } catch (err) {
+                console.error("Authentication error:", err);
+                alert("Connection failed. Please verify the server is running.");
             }
         }
 
-        function loadGallery() {
-            fetch('/api/photos')
-                .then(res => res.json())
-                .then(files => {
-                    const gallery = document.getElementById('gallery-grid');
-                    gallery.innerHTML = "";
-                    
-                    const galleryFiles = files.filter(file => !file.startsWith('bg'));
+        function renderGallery(clientName, photos) {
+            const gallery = document.getElementById('gallery-grid');
+            gallery.innerHTML = "";
+            
+            const galleryFiles = photos.filter(file => !file.startsWith('bg'));
 
-                    if (galleryFiles.length === 0) {
-                        gallery.innerHTML = "<p style='color: var(--text-muted); text-align: center;'>No photographs found in this collection.</p>";
-                        return;
-                    }
+            if (galleryFiles.length === 0) {
+                gallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; grid-column: 1 / -1; width: 100%; padding: 40px;'>No photographs found in this collection.</p>";
+                return;
+            }
 
-                    galleryFiles.forEach(file => {
-                        const div = document.createElement('div');
-                        div.className = 'photo-card';
-                        
-                        // We use an empty onclick to ensure mobile devices trigger the hover states properly
-                        div.innerHTML = `
-                            <img src="/uploads/events/${file}" loading="lazy" alt="Client Image">
-                            <a href="/uploads/events/${file}" class="download-btn" download onclick="event.stopPropagation();">Download</a>
-                        `;
-                        gallery.appendChild(div);
-                    });
-                })
-                .catch(err => {
-                    console.error("Error loading gallery:", err);
-                });
+            galleryFiles.forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'photo-card';
+                const fileUrl = `/uploads/${encodeURIComponent(clientName)}/${encodeURIComponent(file)}`;
+                
+                div.innerHTML = `
+                    <img src="${fileUrl}" loading="lazy" alt="Client Image">
+                    <a href="${fileUrl}" class="download-btn" download onclick="event.stopPropagation();">Download</a>
+                `;
+                gallery.appendChild(div);
+            });
         }
+
+        // Contact Form Submission Handler
+        const contactForm = document.getElementById('contactForm');
+        const contactStatus = document.getElementById('contactStatus');
+        const contactSubmit = document.getElementById('contactSubmit');
+
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            contactStatus.style.display = 'none';
+            contactSubmit.disabled = true;
+            contactSubmit.textContent = 'Sending...';
+
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const message = document.getElementById('contactMessage').value;
+            const clientName = window.currentClientName || '';
+
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, message, clientName })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    contactStatus.style.color = '#065f46';
+                    contactStatus.style.background = '#ecfdf5';
+                    contactStatus.textContent = result.message || 'Message sent successfully!';
+                    contactStatus.style.display = 'block';
+                    contactForm.reset();
+                } else {
+                    contactStatus.style.color = '#991b1b';
+                    contactStatus.style.background = '#fef2f2';
+                    contactStatus.textContent = result.error || 'Failed to send message.';
+                    contactStatus.style.display = 'block';
+                }
+            } catch (err) {
+                console.error("Submit contact form error:", err);
+                contactStatus.style.color = '#991b1b';
+                contactStatus.style.background = '#fef2f2';
+                contactStatus.textContent = 'Connection error. Please try again.';
+                contactStatus.style.display = 'block';
+            } finally {
+                contactSubmit.disabled = false;
+                contactSubmit.textContent = 'Send Message';
+            }
+        });
     </script>
 </body>
 </html>

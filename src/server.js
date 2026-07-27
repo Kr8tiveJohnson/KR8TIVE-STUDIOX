@@ -1,34 +1,63 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
+const dotenv = require('dotenv');
+const initDb = require('./db/init');
+const photoRoutes = require('./routes/photoRoutes');
+const auth = require('./middleware/auth');
 
-// 1. Initialize the app first
+dotenv.config();
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// 2. Now you can use middleware
-app.use(cors()); 
+// Initialize Database automatically on startup
+initDb()
+    .then(() => {
+        console.log("Database initialized and synced.");
+    })
+    .catch(err => {
+        console.error("Critical database initialization error:", err);
+    });
+
+// Middleware
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// 3. Define your authentication middleware
-const auth = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-        res.setHeader('WWW-Authenticate', 'Basic');
-        return res.status(401).send('Authentication required.');
-    }
-    const [user, pass] = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-    
-    if (user === 'kr8tiveadmin' && pass === 'studix2026') {
-        next();
-    } else {
-        res.status(401).send('Invalid credentials.');
-    }
-};
-
-// 4. Define your routes
-app.get('/admin', auth, (req, res) => { 
-    res.sendFile(path.join(__dirname, '../admin.html')); 
+// Serve Static Frontends
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../gallery.html'));
 });
 
-// ... rest of your code
+// Admin panel protected by Basic Auth
+app.get('/admin', auth, (req, res) => {
+    res.sendFile(path.join(__dirname, '../admin.html'));
+});
+
+// Serve uploaded images/files statically
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/public', express.static(path.join(__dirname, '../public')));
+
+// Serve favicon explicitly at root so browsers find it automatically
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/favicon.ico'));
+});
+app.get('/favicon.png', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/favicon.png'));
+});
+
+// Register API Routes
+app.use('/api', photoRoutes);
+
+// Catch-all 404 handler
+app.use((req, res) => {
+    res.status(404).send('Page not found.');
+});
+
+// Start Server
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Admin Portal: http://localhost:${PORT}/admin`);
+    console.log(`Client Portal: http://localhost:${PORT}/`);
+});
