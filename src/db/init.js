@@ -103,6 +103,18 @@ async function initDb() {
             ALTER TABLE messages ADD COLUMN IF NOT EXISTS client_id INTEGER REFERENCES clients(id) ON DELETE SET NULL
         `);
 
+        // Create reviews table
+        await dbClient.query(`
+            CREATE TABLE IF NOT EXISTS reviews (
+                id SERIAL PRIMARY KEY,
+                client_id INTEGER REFERENCES clients(id) ON DELETE SET NULL,
+                name VARCHAR(255) NOT NULL,
+                rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+                comment TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         console.log("Database tables initialized successfully.");
 
         // 3. Seed default 'events' client with PIN 'KR8TIVE2026'

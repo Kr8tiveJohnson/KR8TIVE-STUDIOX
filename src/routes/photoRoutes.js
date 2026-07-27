@@ -398,4 +398,66 @@ router.delete('/admin/messages/:id', auth, async (req, res) => {
     }
 });
 
+// ================= REVIEWS & RATINGS APIS =================
+
+// POST to submit a client review & star rating (Public)
+router.post('/reviews', async (req, res) => {
+    const { name, rating, comment, clientName } = req.body;
+    const numRating = parseInt(rating, 10);
+
+    if (!name || !comment || isNaN(numRating) || numRating < 1 || numRating > 5) {
+        return res.status(400).json({ error: "Name, Comment, and a 1-5 Star Rating are required." });
+    }
+
+    try {
+        let clientId = null;
+        if (clientName) {
+            const clientRes = await pool.query("SELECT id FROM clients WHERE client_name = $1", [clientName]);
+            if (clientRes.rowCount > 0) {
+                clientId = clientRes.rows[0].id;
+            }
+        }
+
+        await pool.query(
+            "INSERT INTO reviews (client_id, name, rating, comment) VALUES ($1, $2, $3, $4)",
+            [clientId, name.trim(), numRating, comment.trim()]
+        );
+        res.json({ success: true, message: "Thank you! Your review and rating have been submitted." });
+    } catch (err) {
+        console.error("Error saving client review:", err);
+        res.status(500).json({ error: "Failed to submit review. Please try again." });
+    }
+});
+
+// GET all client reviews (Admin only)
+router.get('/admin/reviews', auth, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT r.id, r.name, r.rating, r.comment, r.created_at, c.display_name as client_display_name, c.client_name as client_slug
+            FROM reviews r
+            LEFT JOIN clients c ON r.client_id = c.id
+            ORDER BY r.created_at DESC
+        `);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error retrieving reviews:", err);
+        res.status(500).json({ error: "Failed to retrieve reviews." });
+    }
+});
+
+// DELETE a client review (Admin only)
+router.delete('/admin/reviews/:id', auth, async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    try {
+        const result = await pool.query("DELETE FROM reviews WHERE id = $1 RETURNING id", [id]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: "Review not found." });
+        }
+        res.json({ message: "Review deleted successfully." });
+    } catch (err) {
+        console.error("Error deleting review:", err);
+        res.status(500).json({ error: "Failed to delete review." });
+    }
+});
+
 module.exports = router;

@@ -595,6 +595,31 @@ tr:hover td {
         </div>
     </div>
 
+    <!-- Client Reviews & Ratings Manager -->
+    <div class="manage-card">
+        <h2>Client Reviews & Ratings</h2>
+        <p class="subtitle">View ratings and reviews submitted by clients across your collections.</p>
+        <div style="overflow-x: auto; margin-top: 25px;">
+            <table>
+                <thead>
+                    <tr style="border-bottom: 2px solid #eee; color: #555;">
+                        <th style="font-weight: 600; width: 15%;">Date</th>
+                        <th style="font-weight: 600; width: 18%;">Collection</th>
+                        <th style="font-weight: 600; width: 15%;">Client Name</th>
+                        <th style="font-weight: 600; width: 14%;">Rating</th>
+                        <th style="font-weight: 600; width: 28%;">Review / Comment</th>
+                        <th style="font-weight: 600; width: 10%; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="reviewListBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #777; padding: 20px;">Loading reviews...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -1117,9 +1142,73 @@ async function deleteMessage(id) {
     }
 }
 
+const reviewListBody = document.getElementById('reviewListBody');
+
+// Fetch and load client reviews
+async function loadReviews() {
+    try {
+        const res = await fetch('/api/admin/reviews');
+        if (!res.ok) throw new Error("Unauthorized or server error");
+        const reviews = await res.json();
+        
+        reviewListBody.innerHTML = '';
+        if (reviews.length === 0) {
+            reviewListBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #777; padding: 20px;">No reviews received yet.</td></tr>`;
+        } else {
+            reviews.forEach(rev => {
+                const date = new Date(rev.created_at).toLocaleString();
+                const collectionName = rev.client_display_name 
+                    ? `<strong>${rev.client_display_name}</strong> <br><span style="font-size:0.75rem; color:#888; font-family:monospace;">(${rev.client_slug})</span>` 
+                    : `<span style="color:#aaa; font-style:italic;">General Website</span>`;
+                
+                const stars = '★'.repeat(rev.rating) + '☆'.repeat(5 - rev.rating);
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding: 12px 10px; color: #555; font-size: 0.85rem;">${date}</td>
+                    <td style="padding: 12px 10px; font-size: 0.9rem;">${collectionName}</td>
+                    <td style="padding: 12px 10px; font-weight: 600;">${rev.name}</td>
+                    <td style="padding: 12px 10px; color: #f59e0b; font-size: 1.1rem; letter-spacing: 2px; font-weight: bold;" title="${rev.rating} of 5 Stars">${stars}</td>
+                    <td style="padding: 12px 10px; font-weight: 300; line-height: 1.5; color: #222; font-size: 0.9rem;">${rev.comment}</td>
+                    <td style="padding: 12px 10px; text-align: right;">
+                        <button onclick="deleteReview(${rev.id})" style="background: #ff4444; color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: 0.2s;">Delete</button>
+                    </td>
+                `;
+                reviewListBody.appendChild(tr);
+            });
+        }
+    } catch (err) {
+        console.error("Error loading reviews:", err);
+        reviewListBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ff4444; padding: 20px;">Failed to load reviews. Check server logs.</td></tr>`;
+    }
+}
+
+// Delete client review
+async function deleteReview(id) {
+    if (!confirm("Are you sure you want to delete this review?")) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/admin/reviews/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (res.ok) {
+            loadReviews();
+        } else {
+            alert("Failed to delete review.");
+        }
+    } catch (err) {
+        console.error("Delete review error:", err);
+        alert("Failed to delete review due to connection error.");
+    }
+}
+
 // Initial bootstrap load
 loadClients();
 loadMessages();
+loadReviews();
 </script>
 
 </body>
