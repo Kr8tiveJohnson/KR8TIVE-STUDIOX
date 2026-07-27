@@ -559,9 +559,19 @@
                     ? file
                     : `/uploads/${encodeURIComponent(clientName)}/${encodeURIComponent(file)}`;
                 
+                // Derive original filename for download title
+                const rawFileName = file.split('/').pop() || 'photo.jpg';
+                const downloadName = rawFileName.includes('-') && !rawFileName.startsWith('http')
+                    ? rawFileName.substring(rawFileName.indexOf('-') + 1)
+                    : rawFileName;
+
+                const downloadUrl = `/api/download?url=${encodeURIComponent(fileUrl)}&name=${encodeURIComponent(downloadName)}&client=${encodeURIComponent(clientName)}`;
+                
+                div.onclick = () => window.open(fileUrl, '_blank');
+                
                 div.innerHTML = `
                     <img src="${fileUrl}" loading="lazy" alt="Client Image">
-                    <a href="${fileUrl}" class="download-btn" download onclick="event.stopPropagation();">Download</a>
+                    <a href="${downloadUrl}" class="download-btn" onclick="event.stopPropagation();">Download</a>
                 `;
                 gallery.appendChild(div);
             });

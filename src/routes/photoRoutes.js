@@ -33,6 +33,43 @@ router.get('/debug-db', async (req, res) => {
     }
 });
 
+// ================= DOWNLOAD PROXY ENDPOINT =================
+
+// GET force attachment download endpoint for remote cloud blob URLs & local files
+router.get('/download', async (req, res) => {
+    const fileUrl = req.query.url;
+    const filename = req.query.name || 'photo.jpg';
+
+    if (!fileUrl) {
+        return res.status(400).send('Missing file URL.');
+    }
+
+    try {
+        if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
+            // Fetch remote blob image and set Attachment headers to force browser file download
+            const response = await fetch(fileUrl);
+            if (!response.ok) {
+                return res.status(404).send('File not found on cloud server.');
+            }
+            const contentType = response.headers.get('content-type') || 'image/jpeg';
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+            
+            const arrayBuffer = await response.arrayBuffer();
+            return res.send(Buffer.from(arrayBuffer));
+        } else {
+            // Local file system fallback
+            const safeFile = path.basename(fileUrl);
+            const clientName = req.query.client || 'events';
+            const localPath = path.join(__dirname, '../../uploads', clientName, safeFile);
+            return res.download(localPath, filename);
+        }
+    } catch (err) {
+        console.error("Download proxy error:", err);
+        res.status(500).send("Error processing file download.");
+    }
+});
+
 // ================= CLIENT MANAGEMENT APIS (ADMIN-ONLY) =================
 
 // GET all clients with photo count
