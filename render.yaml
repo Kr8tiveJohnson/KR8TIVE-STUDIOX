@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: kr8tive-studiox
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: POSTGRES_URL
+        sync: false
+      - key: BLOB_READ_WRITE_TOKEN
+        sync: false
