@@ -11,7 +11,16 @@ const { upload } = require('../controllers/uploadController');
 router.get('/debug-db', async (req, res) => {
     try {
         const testRes = await pool.query("SELECT NOW()");
-        res.json({ success: true, time: testRes.rows[0].now });
+        const tablesRes = await pool.query(`
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+        `);
+        res.json({ 
+            success: true, 
+            time: testRes.rows[0].now,
+            tables: tablesRes.rows.map(r => r.table_name)
+        });
     } catch (err) {
         res.status(500).json({
             success: false,
