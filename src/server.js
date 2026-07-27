@@ -26,13 +26,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve Static Frontends
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../gallery.html'));
+app.get(['/', '/index.html', '/gallery.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, '../gallery.html'), (err) => {
+        if (err) {
+            console.error("Error serving gallery.html:", err);
+            res.status(500).send("Error loading gallery page.");
+        }
+    });
 });
 
 // Admin panel protected by Basic Auth
-app.get('/admin', auth, (req, res) => {
-    res.sendFile(path.join(__dirname, '../admin.html'));
+app.get(['/admin', '/admin.html'], auth, (req, res) => {
+    res.sendFile(path.join(__dirname, '../admin.html'), (err) => {
+        if (err) {
+            console.error("Error serving admin.html:", err);
+            res.status(500).send("Error loading admin page.");
+        }
+    });
 });
 
 // Serve uploaded images/files statically
